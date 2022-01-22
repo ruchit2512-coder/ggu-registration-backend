@@ -23,17 +23,33 @@ app.use(bodyParser.urlencoded({
 //     res.render("registration");
 // })
 
-app.post("/sign_up", async(req,res)=>{
+app.post("/sign_up", async(req,res,next)=>{
     try{
         
-        const newStudent = new Register({
-            firstname : req.body.firstname,
-            lastname : req.body.lastname,
+        let user = await Register.findOne({
             email : req.body.email
-        })
+        });
 
-        const registered = await newStudent.save();
-        res.status(201).redirect("index.html");
+        if(user){
+            res.redirect("registered.html");
+            // var err = new Error('A user with that email has already registered. Please use a different email..')
+            // err.status = 400;
+            // return next(err);
+    
+        }
+        else {
+            user = new Register({
+                firstname : req.body.firstname,
+                lastname : req.body.lastname,
+                email : req.body.email
+            }) 
+
+            // const registered = await newStudent.save();
+            await user.save()
+            res.status(201).redirect("index.html");
+            // next();
+        }    
+        
     }
     catch(error){
         res.status(404).send(error);
